@@ -2,8 +2,6 @@ import React, { createContext, useState, useEffect } from "react";
 
 export const AppContext = createContext();
 
-const API_BASE_URL = 'http://localhost:5000/api';
-
 export function AppProvider({ children }) {
   const [currentView, setCurrentView] = useState("login");
   const [activeUser, setActiveUser] = useState(null);
@@ -15,11 +13,7 @@ export function AppProvider({ children }) {
   // Active audio recording file being played
   const [playingAudio, setPlayingAudio] = useState(null);
 
-  // SOS States
-  const [activeSosCount, setActiveSosCount] = useState(0);
-  const [activeSosCalls, setActiveSosCalls] = useState([]);
-
-  // App Stats
+  // App Stats derived or fixed
   const [stats, setStats] = useState({
     calls: 158,
     waiting: 100,
@@ -28,104 +22,160 @@ export function AppProvider({ children }) {
     onlineAgents: 10,
   });
 
-  // State caches for data syncing
-  const [bookings, setBookings] = useState([]);
-  const [tickets, setTickets] = useState([]);
-  const [callHistory, setCallHistory] = useState([]);
-  const [agents, setAgents] = useState([]);
-  const [liveCalls, setLiveCalls] = useState([]);
-  const [crmRecords, setCrmRecords] = useState([]);
+  // Today's Bookings
+  const [bookings, setBookings] = useState([
+    {
+      id: "SH-1024",
+      customer: "ABC Builders",
+      location: "Gachibowli",
+      workers: 25,
+      status: "Assigned",
+      agent: "Rahul",
+      date: "2026-07-24",
+      time: "10:00 AM",
+      mediator: "Ramesh",
+      workType: "Mason"
+    },
+    {
+      id: "SH-1025",
+      customer: "XYZ Infra",
+      location: "Madhapur",
+      workers: 10,
+      status: "Pending",
+      agent: "Priya",
+      date: "2026-07-24",
+      time: "11:30 AM",
+      mediator: "",
+      workType: "Carpenter"
+    }
+  ]);
 
-  // Available mediators list (Static mock configuration)
+  // Tickets logs
+  const [tickets, setTickets] = useState([
+    {
+      id: "SH-2026-00231",
+      customer: "ABC Builders",
+      complaint: "Delay in worker arrival",
+      priority: "High",
+      description: "Customer reported that the painters assigned did not arrive on time.",
+      agent: "Rahul",
+      status: "In Progress",
+      date: "2026-07-23"
+    },
+    {
+      id: "SH-2026-00232",
+      customer: "XYZ Infra",
+      complaint: "Incorrect billing",
+      priority: "Medium",
+      description: "Discrepancy in invoice amount for Madhapur project.",
+      agent: "Priya",
+      status: "Open",
+      date: "2026-07-23"
+    }
+  ]);
+
+  // Call Logs History
+  const [callHistory, setCallHistory] = useState([
+    {
+      id: "hist-1",
+      date: "10:20 AM",
+      customer: "ABC Builders",
+      agent: "Rahul",
+      duration: "04:15",
+      recordingUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+    },
+    {
+      id: "hist-2",
+      date: "11:35 AM",
+      customer: "XYZ Infra",
+      agent: "Priya",
+      duration: "02:45",
+      recordingUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+    },
+    {
+      id: "hist-3",
+      date: "01:15 PM",
+      customer: "Home Owner",
+      agent: "Sai",
+      duration: "05:21",
+      recordingUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+    }
+  ]);
+
+  // Agent Status List
+  const [agents, setAgents] = useState([
+    { name: "Rahul", status: "Talking", badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+    { name: "Anjali", status: "Available", badgeColor: "bg-teal-100 text-teal-800 border-teal-200" },
+    { name: "Ravi", status: "Break", badgeColor: "bg-amber-100 text-amber-800 border-amber-200" },
+    { name: "Sai", status: "Offline", badgeColor: "bg-slate-100 text-slate-800 border-slate-200" }
+  ]);
+
+  // Live calls (for supervisor monitoring)
+  const [liveCalls, setLiveCalls] = useState([
+    { id: "live-1", agent: "Rahul", customer: "ABC Builders", duration: "04:21" },
+    { id: "live-2", agent: "Priya", customer: "XYZ Infra", duration: "02:15" },
+    { id: "live-3", agent: "Sai", customer: "Home Owner", duration: "01:08" }
+  ]);
+
+  // Customer CRM data
+  const [crmRecords, setCrmRecords] = useState([
+    {
+      id: "crm-1",
+      name: "ABC Builders",
+      company: "ABC Builders Pvt Ltd",
+      gst: "36AAAAA1111A1Z1",
+      email: "info@abcbuilders.com",
+      phone: "+91 98765 43210",
+      address: "Plot 45, IT Park",
+      city: "Hyderabad",
+      state: "Telangana",
+      preferredLanguage: "English",
+      notes: "Prefers Ramesh as mediator. Always prompt on payments.",
+      previousBookingsCount: 18,
+      outstandingAmount: 12500,
+      mediator: "Ramesh"
+    },
+    {
+      id: "crm-2",
+      name: "XYZ Infra",
+      company: "XYZ Infrastructure",
+      gst: "36BBBBB2222B1Z2",
+      email: "contact@xyzinfra.in",
+      phone: "+91 87654 32109",
+      address: "Survey 12, Hitech City",
+      city: "Hyderabad",
+      state: "Telangana",
+      preferredLanguage: "Telugu",
+      notes: "Requires Telugu speaking workers.",
+      previousBookingsCount: 8,
+      outstandingAmount: 0,
+      mediator: "Priya"
+    },
+    {
+      id: "crm-3",
+      name: "Home Owner",
+      company: "Individual",
+      gst: "N/A",
+      email: "owner@gmail.com",
+      phone: "+91 76543 21098",
+      address: "Flat 202, Sunshine Apts",
+      city: "Hyderabad",
+      state: "Telangana",
+      preferredLanguage: "Hindi",
+      notes: "Requires helper for cleaning. Payment usually via UPI.",
+      previousBookingsCount: 3,
+      outstandingAmount: 3200,
+      mediator: "Sai"
+    }
+  ]);
+
+  // Available mediators list
   const mediators = [
     { name: "Ramesh", distance: "5 km", rating: "4.8" },
     { name: "Sai", distance: "3 km", rating: "4.5" },
     { name: "Naveen", distance: "8 km", rating: "4.9" },
     { name: "Kiran", distance: "2 km", rating: "4.2" }
   ];
-
-  // Refresh data from PostgreSQL DB API
-  const refreshData = async () => {
-    try {
-      // 1. Fetch Agents
-      const resAgents = await fetch(`${API_BASE_URL}/agents`);
-      if (resAgents.ok) {
-        const res = await resAgents.json();
-        if (res.success) setAgents(res.data);
-      }
-
-      // 2. Fetch CRM records
-      const resCrm = await fetch(`${API_BASE_URL}/crm`);
-      if (resCrm.ok) {
-        const res = await resCrm.json();
-        if (res.success) setCrmRecords(res.data);
-      }
-
-      // 3. Fetch Bookings
-      const resBookings = await fetch(`${API_BASE_URL}/bookings`);
-      if (resBookings.ok) {
-        const res = await resBookings.json();
-        if (res.success) setBookings(res.data);
-      }
-
-      // 4. Fetch Tickets
-      const resTickets = await fetch(`${API_BASE_URL}/tickets`);
-      if (resTickets.ok) {
-        const res = await resTickets.json();
-        if (res.success) setTickets(res.data);
-      }
-
-      // 5. Fetch Call History
-      const resHistory = await fetch(`${API_BASE_URL}/calls/history`);
-      if (resHistory.ok) {
-        const res = await resHistory.json();
-        if (res.success) setCallHistory(res.data);
-      }
-
-      // 6. Fetch Active Calls (Live Feed)
-      const resActive = await fetch(`${API_BASE_URL}/calls/active`);
-      if (resActive.ok) {
-        const res = await resActive.json();
-        if (res.success) setLiveCalls(res.data);
-      }
-
-      // 7. Fetch active SOS Calls
-      const resSos = await fetch(`${API_BASE_URL}/sos/active-count`);
-      if (resSos.ok) {
-        const res = await resSos.json();
-        if (res.success) {
-          setActiveSosCount(res.activeCount);
-          setActiveSosCalls(res.activeCalls);
-        }
-      }
-    } catch (err) {
-      console.warn("Backend API offline. Operating in Local Mock Mode.", err.message);
-    }
-  };
-
-  // Poll database state updates every 3 seconds
-  useEffect(() => {
-    refreshData();
-    const interval = setInterval(refreshData, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Update statistics dynamically based on historical counts
-  useEffect(() => {
-    if (callHistory.length > 0) {
-      const totalCalls = callHistory.length + liveCalls.length;
-      const completed = callHistory.filter(c => c.status === 'completed').length;
-      const failed = callHistory.filter(c => c.status !== 'completed').length;
-
-      setStats({
-        calls: totalCalls,
-        waiting: liveCalls.length,
-        answered: completed,
-        missed: failed,
-        onlineAgents: agents.filter(a => a.status !== 'Offline').length || 4
-      });
-    }
-  }, [callHistory, liveCalls, agents]);
 
   // Auth Functions
   const login = (email, password) => {
@@ -143,135 +193,82 @@ export function AppProvider({ children }) {
     setCurrentView("login");
   };
 
-  // Simulate an Incoming Call from Header
+  // Simulate an Incoming Call (triggered from header for demonstration)
   const triggerIncomingCall = (customerName = "ABC Builders") => {
-    const matchedCRM = crmRecords.find(c => c.name === customerName) || crmRecords[0] || {
-      name: customerName,
-      phone: "+919876543210",
-      city: "Hyderabad",
-      state: "Telangana",
-      previousBookingsCount: 5,
-      outstandingAmount: 0,
-      mediator: "Ramesh",
-      address: "Plot 45, IT Park"
-    };
+    const matchedCRM = crmRecords.find(c => c.name === customerName) || crmRecords[0];
     
+    // Set active call details
     setActiveCall({
       id: `call-${Date.now()}`,
       customerName: matchedCRM.name,
       phoneNumber: matchedCRM.phone,
-      location: `${matchedCRM.city || 'Hyderabad'}, ${matchedCRM.state || 'Telangana'}`,
-      type: (matchedCRM.previousBookingsCount || 0) > 0 ? "Existing" : "New",
-      previousCalls: matchedCRM.previousBookingsCount || 0,
-      outstandingAmount: matchedCRM.outstandingAmount || 0,
-      assignedMediator: matchedCRM.mediator || "Ramesh",
+      location: matchedCRM.city + ", " + matchedCRM.state,
+      type: matchedCRM.previousBookingsCount > 0 ? "Existing" : "New",
+      previousCalls: matchedCRM.previousBookingsCount,
+      outstandingAmount: matchedCRM.outstandingAmount,
+      assignedMediator: matchedCRM.mediator,
       notes: "",
       bookingDetails: {
         workersRequired: "",
         workType: "Mason",
         date: "",
         time: "",
-        location: matchedCRM.address || "Kondapur"
+        location: matchedCRM.address
       }
     });
     setCurrentView("incoming-calls");
-  };
-
-  // Trigger Outbound calling connect API
-  const triggerOutboundCall = async (from, to, customerName, agentName) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/calls/connect`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from, to, customerName, agentName })
-      });
-      if (response.ok) {
-        await refreshData();
-      }
-    } catch (err) {
-      console.error("Outbound API call failed:", err.message);
-    }
-  };
-
-  // Trigger emergency SOS Call
-  const triggerSOSCall = async (customerName = 'SOS Caller', customerNumber = '+919555512345') => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/sos/trigger`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerName,
-          customerNumber,
-          agentName: activeUser ? activeUser.name : 'Carol'
-        })
-      });
-      if (response.ok) {
-        await refreshData();
-      }
-    } catch (err) {
-      console.error("SOS API trigger failed:", err.message);
-    }
-  };
-
-  // Trigger bulk SOS simulation
-  const simulateBulkSOSCalls = async (count = 100) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/sos/simulate-bulk`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ count })
-      });
-      if (response.ok) {
-        await refreshData();
-      }
-    } catch (err) {
-      console.error("Bulk SOS simulation failed:", err.message);
-    }
+    
+    // Increment total calls statistic
+    setStats(prev => ({ ...prev, calls: prev.calls + 1, waiting: prev.waiting + 1 }));
   };
 
   const endCall = () => {
+    if (activeCall) {
+      // Add call log to history
+      const durationSecs = Math.floor(Math.random() * 200) + 30; // Random length
+      const mins = Math.floor(durationSecs / 60);
+      const secs = durationSecs % 60;
+      const formattedDuration = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+      const now = new Date();
+      const hours = now.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const formattedTime = `${displayHours}:${minutes} ${ampm}`;
+
+      const newLog = {
+        id: `hist-${Date.now()}`,
+        date: formattedTime,
+        customer: activeCall.customerName,
+        agent: activeUser ? activeUser.name : "Carol",
+        duration: formattedDuration,
+        recordingUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+      };
+
+      setCallHistory(prev => [newLog, ...prev]);
+      setStats(prev => ({
+        ...prev,
+        waiting: Math.max(0, prev.waiting - 1),
+        answered: prev.answered + 1
+      }));
+    }
     setActiveCall(null);
     setCurrentView("dashboard");
   };
 
+  // Actions within the Incoming Call screen pop
   const saveCallNotes = (notes) => {
     if (activeCall) {
       setActiveCall(prev => ({ ...prev, notes }));
     }
   };
 
-  // Create booking via PostgreSQL API
-  const createBooking = async (bookingData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/bookings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer: bookingData.customerName || "Walk-in Customer",
-          location: bookingData.location || "Kondapur",
-          workers: bookingData.workersRequired || 1,
-          date: bookingData.date,
-          time: bookingData.time,
-          workType: bookingData.workType
-        })
-      });
-      if (response.ok) {
-        const res = await response.json();
-        if (res.success) {
-          setPendingBookingId(res.data.bookingId);
-          await refreshData();
-          setCurrentView("mediators");
-          return;
-        }
-      }
-    } catch (err) {
-      console.error("Booking post error:", err.message);
-    }
-
-    // Local Fallback
+  // Create booking
+  const createBooking = (bookingData) => {
     const newId = `SH-${Math.floor(1000 + Math.random() * 9000)}`;
     const newBooking = {
-      bookingId: newId,
+      id: newId,
       customer: bookingData.customerName || "Walk-in Customer",
       location: bookingData.location || "Kondapur",
       workers: parseInt(bookingData.workersRequired) || 1,
@@ -285,37 +282,16 @@ export function AppProvider({ children }) {
 
     setBookings(prev => [newBooking, ...prev]);
     setPendingBookingId(newId);
-    setCurrentView("mediators");
+    setCurrentView("mediators"); // Redirect to mediator assignment screen pop
   };
 
-  // Assign mediator via PostgreSQL API
-  const assignMediator = async (mediatorName) => {
+  // Assign mediator
+  const assignMediator = (mediatorName) => {
     if (!pendingBookingId) return;
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/bookings/${pendingBookingId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'Assigned',
-          mediator: mediatorName,
-          agent: activeUser ? activeUser.name : 'Carol'
-        })
-      });
-      if (response.ok) {
-        setPendingBookingId(null);
-        await refreshData();
-        setCurrentView("bookings");
-        return;
-      }
-    } catch (err) {
-      console.error("Assign mediator API error:", err.message);
-    }
-
-    // Fallback
+    
     setBookings(prev =>
       prev.map(b =>
-        b.bookingId === pendingBookingId
+        b.id === pendingBookingId
           ? { ...b, status: "Assigned", mediator: mediatorName }
           : b
       )
@@ -324,39 +300,17 @@ export function AppProvider({ children }) {
     setCurrentView("bookings");
   };
 
-  // Create ticket via PostgreSQL API
-  const createTicket = async (ticketData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/tickets`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer: ticketData.customer || "Unknown",
-          complaint: ticketData.complaint || "General Complaint",
-          priority: ticketData.priority || "Medium",
-          description: ticketData.description || "",
-          agent: activeUser ? activeUser.name : "Carol"
-        })
-      });
-      if (response.ok) {
-        await refreshData();
-        setCurrentView("tickets");
-        return;
-      }
-    } catch (err) {
-      console.error("Ticket post API error:", err.message);
-    }
-
-    // Fallback
+  // Create ticket
+  const createTicket = (ticketData) => {
     const newId = `SH-2026-${Math.floor(10000 + Math.random() * 90000)}`;
     const newTicket = {
-      ticketId: newId,
+      id: newId,
       customer: ticketData.customer || "Unknown",
       complaint: ticketData.complaint || "General Complaint",
       priority: ticketData.priority || "Medium",
       description: ticketData.description || "",
       agent: ticketData.agent || (activeUser ? activeUser.name : "Carol"),
-      status: "Open",
+      status: ticketData.status || "Open",
       date: new Date().toISOString().split('T')[0]
     };
 
@@ -364,45 +318,17 @@ export function AppProvider({ children }) {
     setCurrentView("tickets");
   };
 
-  // Update ticket status via PostgreSQL API
-  const updateTicketStatus = async (ticketId, newStatus) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-      if (response.ok) {
-        await refreshData();
-      }
-    } catch (err) {
-      console.error("Update ticket status API error:", err.message);
-    }
-
-    // Fallback
+  // Update ticket status
+  const updateTicketStatus = (ticketId, newStatus) => {
     setTickets(prev =>
-      prev.map(t => (t.ticketId === ticketId ? { ...t, status: newStatus } : t))
+      prev.map(t => (t.id === ticketId ? { ...t, status: newStatus } : t))
     );
   };
 
-  // Update customer record via PostgreSQL API
-  const updateCRMRecord = async (updatedRecord) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/crm/${updatedRecord.crmId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedRecord)
-      });
-      if (response.ok) {
-        await refreshData();
-      }
-    } catch (err) {
-      console.error("Update CRM API error:", err.message);
-    }
-
-    // Fallback
+  // Update customer record
+  const updateCRMRecord = (updatedRecord) => {
     setCrmRecords(prev =>
-      prev.map(r => (r.crmId === updatedRecord.crmId ? updatedRecord : r))
+      prev.map(r => (r.id === updatedRecord.id ? updatedRecord : r))
     );
   };
 
@@ -430,11 +356,6 @@ export function AppProvider({ children }) {
         login,
         logout,
         triggerIncomingCall,
-        triggerOutboundCall,
-        triggerSOSCall,
-        simulateBulkSOSCalls,
-        activeSosCount,
-        activeSosCalls,
         endCall,
         saveCallNotes,
         createBooking,
