@@ -13,6 +13,7 @@ import './db/index.js';
 import { config as exotelConfig, isConfigured } from './config/exotel.js';
 
 // Import Router modules
+import authRouter from './routes/auth.js';
 import callsRouter from './routes/calls.js';
 import bookingsRouter from './routes/bookings.js';
 import ticketsRouter from './routes/tickets.js';
@@ -30,6 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // API Routes registration
+app.use('/api/auth', authRouter);
 app.use('/api/calls', callsRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/tickets', ticketsRouter);

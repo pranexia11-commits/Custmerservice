@@ -70,3 +70,14 @@ export const callHistory = pgTable('call_history', {
   timestamp: timestamp('timestamp').defaultNow().notNull(),
   callType: varchar('call_type', { length: 50 }).default('regular') // 'regular', 'sos'
 });
+
+// 6. Users Table for Authentication & RBAC
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  username: varchar('username', { length: 100 }).notNull().unique(),
+  password: text('password').notNull(),
+  email: varchar('email', { length: 150 }).unique(),
+  role: varchar('role', { length: 50 }).notNull().default('customer'), // 'admin' or 'customer'
+  customerName: varchar('customer_name', { length: 255 }), // optional association with a customer company
+  createdAt: timestamp('created_at').defaultNow().notNull()
+});

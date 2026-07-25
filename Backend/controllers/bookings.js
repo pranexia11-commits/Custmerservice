@@ -7,7 +7,16 @@ import { eq, desc } from 'drizzle-orm';
  */
 export const getBookings = async (req, res) => {
   try {
-    const list = await db.select().from(bookings).orderBy(desc(bookings.id));
+    let list;
+    if (req.user.role === 'customer') {
+      if (!req.user.customerName) {
+        list = [];
+      } else {
+        list = await db.select().from(bookings).where(eq(bookings.customer, req.user.customerName)).orderBy(desc(bookings.id));
+      }
+    } else {
+      list = await db.select().from(bookings).orderBy(desc(bookings.id));
+    }
     return res.status(200).json({ success: true, data: list });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Failed to fetch bookings', error: error.message });
@@ -20,8 +29,18 @@ export const getBookings = async (req, res) => {
 export const createBooking = async (req, res) => {
   const { customer, location, workers, date, time, workType } = req.body;
 
-  if (!customer || !location) {
-    return res.status(400).json({ success: false, message: 'Customer and Location are required' });
+  let bookingCustomer = customer;
+  if (req.user.role === 'customer') {
+    if (!req.user.customerName) {
+      return res.status(403).json({ success: false, message: 'Customer account not associated with a company profile' });
+    }
+    bookingCustomer = req.user.customerName;
+  } else if (!bookingCustomer) {
+    return res.status(400).json({ success: false, message: 'Customer name is required' });
+  }
+
+  if (!location) {
+    return res.status(400).json({ success: false, message: 'Location is required' });
   }
 
   const bookingId = `SH-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -29,7 +48,7 @@ export const createBooking = async (req, res) => {
   try {
     const newBookingData = {
       bookingId,
-      customer,
+      customer: bookingCustomer,
       location,
       workers: workers ? parseInt(workers, 10) : 1,
       status: 'Pending',

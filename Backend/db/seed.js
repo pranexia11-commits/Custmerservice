@@ -1,5 +1,6 @@
 import { db } from './index.js';
 import * as schema from './schema.js';
+import bcrypt from 'bcryptjs';
 
 async function seed() {
   console.log('🌱 Starting database seeding...');
@@ -11,6 +12,7 @@ async function seed() {
     await db.delete(schema.bookings);
     await db.delete(schema.tickets);
     await db.delete(schema.callHistory);
+    await db.delete(schema.users);
     
     console.log('🧹 Cleared all existing table data');
 
@@ -150,6 +152,27 @@ async function seed() {
         duration: '05:21',
         status: 'completed',
         recordingUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
+      }
+    ]);
+
+    // 7. Insert Seed Users
+    console.log('🔒 Seeding Users...');
+    const adminPasswordHash = await bcrypt.hash('adminpassword', 10);
+    const customerPasswordHash = await bcrypt.hash('customerpassword', 10);
+    
+    await db.insert(schema.users).values([
+      {
+        username: 'admin',
+        password: adminPasswordHash,
+        email: 'admin@customerservice.com',
+        role: 'admin'
+      },
+      {
+        username: 'customer',
+        password: customerPasswordHash,
+        email: 'customer@abcbuilders.com',
+        role: 'customer',
+        customerName: 'ABC Builders'
       }
     ]);
 

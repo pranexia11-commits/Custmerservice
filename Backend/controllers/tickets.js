@@ -7,7 +7,16 @@ import { eq, desc } from 'drizzle-orm';
  */
 export const getTickets = async (req, res) => {
   try {
-    const list = await db.select().from(tickets).orderBy(desc(tickets.id));
+    let list;
+    if (req.user.role === 'customer') {
+      if (!req.user.customerName) {
+        list = [];
+      } else {
+        list = await db.select().from(tickets).where(eq(tickets.customer, req.user.customerName)).orderBy(desc(tickets.id));
+      }
+    } else {
+      list = await db.select().from(tickets).orderBy(desc(tickets.id));
+    }
     return res.status(200).json({ success: true, data: list });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Failed to fetch tickets', error: error.message });
@@ -20,8 +29,18 @@ export const getTickets = async (req, res) => {
 export const createTicket = async (req, res) => {
   const { customer, complaint, priority, description, agent } = req.body;
 
-  if (!customer || !complaint) {
-    return res.status(400).json({ success: false, message: 'Customer and Complaint are required' });
+  let ticketCustomer = customer;
+  if (req.user.role === 'customer') {
+    if (!req.user.customerName) {
+      return res.status(403).json({ success: false, message: 'Customer account not associated with a company profile' });
+    }
+    ticketCustomer = req.user.customerName;
+  } else if (!ticketCustomer) {
+    return res.status(400).json({ success: false, message: 'Customer name is required' });
+  }
+
+  if (!complaint) {
+    return res.status(400).json({ success: false, message: 'Complaint is required' });
   }
 
   const ticketId = `SH-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
@@ -29,7 +48,7 @@ export const createTicket = async (req, res) => {
   try {
     const newTicketData = {
       ticketId,
-      customer,
+      customer: ticketCustomer,
       complaint,
       priority: priority || 'Medium',
       description: description || '',
