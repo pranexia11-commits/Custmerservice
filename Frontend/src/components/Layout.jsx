@@ -1,3 +1,4 @@
+import logo from "../assets/logo.png";
 import React, { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import {
@@ -63,9 +64,13 @@ export default function Layout({ children }) {
       {/* Sidebar for Desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-violet-100 dark:bg-violet-100 text-slate-900 border-r border-violet-200/60 h-full transition-all duration-300">
         <div className="flex items-center gap-3 px-6 py-5 border-b border-violet-200/60">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-violet-500 text-white font-bold text-lg shadow-lg shadow-violet-500/25">
-            S
-          </div>
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden bg-white shadow-lg flex-shrink-0">
+  <img
+    src={logo}
+    alt="Superherooo Logo"
+    className="w-full h-full object-contain p-1"
+  />
+</div>
           <div>
             <h1 className="font-bold text-sm leading-none text-slate-950 tracking-wide">SUPERHEROOO</h1>
             <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest">Call Center</span>
@@ -119,9 +124,13 @@ export default function Layout({ children }) {
           <aside className="w-64 bg-violet-100 dark:bg-violet-100 text-slate-900 h-full flex flex-col shadow-2xl animate-in slide-in-from-left duration-200">
             <div className="flex items-center justify-between px-6 py-5 border-b border-violet-200/65">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-500 text-white font-bold">
-                  S
-                </div>
+               <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden bg-white shadow-lg flex-shrink-0">
+  <img
+    src={logo}
+    alt="Superherooo Logo"
+    className="w-full h-full object-contain p-1"
+  />
+</div>
                 <span className="font-extrabold text-sm text-slate-950">SUPERHEROOO</span>
               </div>
               <button onClick={() => setSidebarOpen(false)} className="text-slate-600 hover:text-black">
