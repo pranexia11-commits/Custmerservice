@@ -39,6 +39,8 @@ export default function Layout({ children }) {
 
   if (!activeUser) return <>{children}</>;
 
+  const isCustomer = activeUser?.role?.toLowerCase() === 'customer';
+
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "live-calls", label: "Live Calls", icon: PhoneCall },
@@ -57,7 +59,12 @@ export default function Layout({ children }) {
     { id: "agents", label: "Agents", icon: ShieldAlert },
     { id: "settings", label: "Settings", icon: SettingsIcon },
     { id: "customer-sos", label: "Customer App (SOS)", icon: PhoneCall }
-  ];
+  ].filter(item => {
+    if (isCustomer) {
+      return ["customer-sos", "bookings", "tickets", "settings"].includes(item.id);
+    }
+    return true;
+  });
 
   return (
     <div className="flex h-screen bg-violet-50/40 text-slate-900 overflow-hidden">

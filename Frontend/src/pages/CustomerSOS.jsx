@@ -19,7 +19,12 @@ export default function CustomerSOS() {
 
     const checkCallStatus = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/calls/${callSid}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/calls/${callSid}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (response.ok) {
           const res = await response.json();
           if (res.success && res.data) {
@@ -73,9 +78,13 @@ export default function CustomerSOS() {
     setCallStatus('connecting');
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE_URL}/sos/trigger`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           customerName,
           customerNumber: customerPhone,

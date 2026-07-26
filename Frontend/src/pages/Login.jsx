@@ -13,18 +13,18 @@ import {
 export default function Login() {
   const { login } = useContext(AppContext);
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const [error, setError] =useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email) {
-      setError("Email address is required.");
+    if (!username) {
+      setError("Username or Email address is required.");
       return;
     }
 
@@ -35,7 +35,14 @@ export default function Login() {
 
     setError("");
 
-    login(email, password);
+    try {
+      const res = await login(username, password);
+      if (!res.success) {
+        setError(res.message);
+      }
+    } catch (err) {
+      setError("Unable to connect to the backend server.");
+    }
   };
 
   return (
@@ -104,7 +111,7 @@ export default function Login() {
 
             <label className="text-xs uppercase tracking-widest text-slate-400 font-semibold mb-2 block">
 
-              Email Address
+              Username or Email
 
             </label>
 
@@ -116,10 +123,10 @@ export default function Login() {
               />
 
               <input
-                type="email"
-                placeholder="agent@company.com"
-                value={email}
-                onChange={(e)=>setEmail(e.target.value)}
+                type="text"
+                placeholder="admin or customer@abcbuilders.com"
+                value={username}
+                onChange={(e)=>setUsername(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
 

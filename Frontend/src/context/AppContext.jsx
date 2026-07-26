@@ -178,18 +178,47 @@ export function AppProvider({ children }) {
   ];
 
   // Auth Functions
-  const login = (email, password) => {
-    setActiveUser({
-      name: "Agent Carol",
-      email: email || "carol@superherooo.com",
-      role: "Super Agent",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-    });
-    setCurrentView("dashboard");
+  const login = async (username, password) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        const user = data.data.user;
+        const token = data.data.token;
+        const mappedUser = {
+          id: user.id,
+          name: user.customerName || user.username,
+          email: user.email || `${user.username}@company.com`,
+          role: user.role === 'admin' ? 'Admin' : 'Customer',
+          customerName: user.customerName,
+          avatar: user.role === 'admin'
+            ? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80"
+            : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+        };
+        setActiveUser(mappedUser);
+        localStorage.setItem("token", token);
+        if (user.role === 'customer') {
+          setCurrentView("customer-sos");
+        } else {
+          setCurrentView("dashboard");
+        }
+        return { success: true };
+      } else {
+        return { success: false, message: data.message || "Invalid username or password" };
+      }
+    } catch (err) {
+      console.error("Login failed:", err);
+      return { success: false, message: "Could not connect to the authentication server." };
+    }
   };
 
   const logout = () => {
     setActiveUser(null);
+    localStorage.removeItem("token");
     setCurrentView("login");
   };
 
