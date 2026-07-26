@@ -106,7 +106,12 @@ export const login = async (req, res) => {
   }
 
   try {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    const [user] = await db.select().from(users).where(
+      or(
+        eq(users.username, username),
+        eq(users.email, username)
+      )
+    );
 
     if (!user) {
       return res.status(401).json({ 

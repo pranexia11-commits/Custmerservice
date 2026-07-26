@@ -16,7 +16,7 @@ const router = express.Router();
 router.post('/connect', authenticateToken, requireRole(['admin']), connectCall);
 router.get('/history', authenticateToken, requireRole(['admin']), getCallHistory);
 router.get('/active', authenticateToken, requireRole(['admin']), getActiveCalls);
-router.get('/:sid', authenticateToken, requireRole(['admin']), getCallDetails);
+router.get('/:sid', authenticateToken, requireRole(['admin', 'customer']), getCallDetails);
 
 // Webhook endpoints for Exotel integration (Public)
 router.all('/webhooks/connect-customer', connectCustomerWebhook);

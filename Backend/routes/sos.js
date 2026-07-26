@@ -8,11 +8,14 @@ import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Restrict all SOS endpoints to admin only
-router.use(authenticateToken, requireRole(['admin']));
+// Require authenticated token for all SOS routes
+router.use(authenticateToken);
 
-router.post('/trigger', triggerSOS);
-router.get('/active-count', getActiveSOSCount);
-router.post('/simulate-bulk', simulateBulkSOS);
+// Trigger SOS is accessible to both admin and customer roles
+router.post('/trigger', requireRole(['admin', 'customer']), triggerSOS);
+
+// Admin-only endpoints
+router.get('/active-count', requireRole(['admin']), getActiveSOSCount);
+router.post('/simulate-bulk', requireRole(['admin']), simulateBulkSOS);
 
 export default router;
