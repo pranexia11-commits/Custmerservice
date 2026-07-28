@@ -1,0 +1,732 @@
+{
+	"info": {
+		"_postman_id": "d0be13d0-377a-4283-9b8b-e85d9962e20b",
+		"name": "Customer Service API",
+		"description": "Comprehensive API collection for Customer Service System (Auth, Bookings, Tickets, CRM, Agents, Calls, SOS). Includes automated token management script.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Register Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"john_customer\",\n  \"password\": \"customer_password123\",\n  \"email\": \"john.customer@example.com\",\n  \"role\": \"customer\",\n  \"customerName\": \"John Doe Enterprises\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registers a new customer account. Defaults to customer role if role is omitted."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data && jsonData.data.token) {",
+									"        pm.collectionVariables.set(\"token\", jsonData.data.token);",
+									"        console.log(\"Token automatically updated in collection variables!\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"sarah_admin\",\n  \"password\": \"admin_secure_password123\",\n  \"email\": \"sarah.admin@example.com\",\n  \"role\": \"admin\",\n  \"customerName\": null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registers a new admin account by explicitly passing role = 'admin'."
+					},
+					"response": []
+				},
+				{
+					"name": "Login Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data && jsonData.data.token) {",
+									"        pm.collectionVariables.set(\"token\", jsonData.data.token);",
+									"        console.log(\"Token automatically updated in collection variables!\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"john_customer\",\n  \"password\": \"customer_password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Logs in the customer and automatically updates the collection token variable via Postman scripts."
+					},
+					"response": []
+				},
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data && jsonData.data.token) {",
+									"        pm.collectionVariables.set(\"token\", jsonData.data.token);",
+									"        console.log(\"Token automatically updated in collection variables!\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"sarah_admin\",\n  \"password\": \"admin_secure_password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Logs in the admin and automatically updates the collection token variable via Postman scripts."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile (me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Gets current logged in user details using Bearer Auth token."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Bookings",
+			"item": [
+				{
+					"name": "Get Bookings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings"
+							]
+						},
+						"description": "Fetch all bookings (requires token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookingId\": \"SH-1025\",\n  \"customer\": \"John Doe Enterprises\",\n  \"location\": \"Building A, Floor 3\",\n  \"workers\": 3,\n  \"date\": \"2026-07-28\",\n  \"time\": \"11:00 AM\",\n  \"workType\": \"Painter\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings"
+							]
+						},
+						"description": "Create a new booking (requires token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Booking (Admin Only)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"Assigned\",\n  \"agent\": \"Agent John\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"1"
+							]
+						},
+						"description": "Updates booking status or assigned agent (requires admin token)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Tickets",
+			"item": [
+				{
+					"name": "Get Tickets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tickets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tickets"
+							]
+						},
+						"description": "Get all tickets (requires token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Ticket",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ticketId\": \"SH-2026-00232\",\n  \"customer\": \"John Doe Enterprises\",\n  \"complaint\": \"Delayed plumbing service\",\n  \"priority\": \"High\",\n  \"description\": \"The plumbers did not arrive at the scheduled time.\",\n  \"date\": \"2026-07-27\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tickets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tickets"
+							]
+						},
+						"description": "Create a service ticket (requires token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Ticket (Admin Only)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"In Progress\",\n  \"agent\": \"Agent Sarah\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tickets/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tickets",
+								"1"
+							]
+						},
+						"description": "Update ticket status/agent (requires admin token)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. CRM (Admin Only)",
+			"item": [
+				{
+					"name": "Get CRM Records",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/crm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"crm"
+							]
+						},
+						"description": "Fetch CRM customer records (requires admin token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create CRM Record",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"crmId\": \"crm-2\",\n  \"name\": \"Alice Cooper\",\n  \"company\": \"Cooper & Co\",\n  \"gst\": \"22AAAAA0000A1Z5\",\n  \"email\": \"alice@cooper.com\",\n  \"phone\": \"+919876543210\",\n  \"address\": \"456 Elm Street\",\n  \"city\": \"Mumbai\",\n  \"state\": \"Maharashtra\",\n  \"preferredLanguage\": \"English\",\n  \"notes\": \"Prefers weekend bookings only.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/crm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"crm"
+							]
+						},
+						"description": "Create CRM record (requires admin token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update CRM Record",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"city\": \"Pune\",\n  \"notes\": \"Updated notes during call\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/crm/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"crm",
+								"1"
+							]
+						},
+						"description": "Updates details of a CRM customer (requires admin token)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Agents (Admin Only)",
+			"item": [
+				{
+					"name": "Get Agents List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/agents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agents"
+							]
+						},
+						"description": "Get all agents (requires admin token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Agent Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"Break\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agents/Agent%20John/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agents",
+								"Agent John",
+								"status"
+							]
+						},
+						"description": "Updates agent status. e.g. 'Talking', 'Available', 'Break', 'Offline' (requires admin token)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Calls (Exotel)",
+			"item": [
+				{
+					"name": "Connect Call (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerPhone\": \"+919876543210\",\n  \"agentName\": \"Agent John\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/calls/connect",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"calls",
+								"connect"
+							]
+						},
+						"description": "Connects an outbound call between an agent and customer (requires admin token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Call History (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/calls/history",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"calls",
+								"history"
+							]
+						},
+						"description": "Fetches call logs database (requires admin token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Calls (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/calls/active",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"calls",
+								"active"
+							]
+						},
+						"description": "Fetches currently active calls (requires admin token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Call Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/calls/some-exotel-call-sid",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"calls",
+								"some-exotel-call-sid"
+							]
+						},
+						"description": "Get details of a call by SID (requires token)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. SOS Alerts",
+			"item": [
+				{
+					"name": "Trigger SOS Alert",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookingId\": \"SH-1025\",\n  \"reason\": \"Unresolved high risk emergency at site\",\n  \"customerName\": \"John Doe Enterprises\",\n  \"phone\": \"+919876543210\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sos/trigger",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sos",
+								"trigger"
+							]
+						},
+						"description": "Triggers emergency call / SOS webhook notification (requires token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active SOS Count (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sos/active-count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sos",
+								"active-count"
+							]
+						},
+						"description": "Retrieve count of unresolved SOS alarms (requires admin token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Simulate Bulk SOS (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"count\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sos/simulate-bulk",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sos",
+								"simulate-bulk"
+							]
+						},
+						"description": "Fakes multiple SOS triggers simultaneously (requires admin token)."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "your_jwt_token_here",
+			"type": "string"
+		}
+	]
+}
