@@ -5,6 +5,8 @@ import AudioPlayer from "./components/AudioPlayer";
 
 // Pages
 import Login from "./pages/Login";
+import AdminAuth from "./pages/AdminAuth";
+import CustomerSupportAuth from "./pages/CustomerSupportAuth";
 import Dashboard from "./pages/Dashboard";
 import IncomingCall from "./pages/IncomingCall";
 import CallHistory from "./pages/CallHistory";
@@ -35,6 +37,10 @@ function AppContent() {
     switch (currentView) {
       case "login":
         return <Login />;
+      case "admin-auth":
+        return <AdminAuth />;
+      case "customer-auth":
+        return <CustomerSupportAuth />;
       case "dashboard":
         return <Dashboard />;
       case "live-calls":
@@ -73,6 +79,7 @@ function AppContent() {
         return <Dashboard />;
     }
   };
+
 
   return (
     <Layout>

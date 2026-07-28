@@ -58,19 +58,19 @@ export default function AudioPlayer() {
   const waveNodes = [8, 14, 28, 16, 22, 10, 18, 26, 32, 14, 20, 8, 12, 28, 22, 14, 6, 12, 18, 30, 24, 16, 8, 14, 20, 26, 12, 8, 16, 10];
 
   return (
-    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] max-w-2xl bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/60 rounded-2xl shadow-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 z-50 animate-in slide-in-from-bottom duration-300">
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] max-w-2xl bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl shadow-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 z-50 animate-in slide-in-from-bottom duration-300">
       
       {/* Recording Info */}
       <div className="flex items-center gap-3 w-full md:w-auto">
-        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center animate-pulse">
+        <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center animate-pulse border border-purple-100">
           <Volume2 className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Now Playing</h4>
-          <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+          <h4 className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">Now Playing</h4>
+          <p className="text-sm font-extrabold text-slate-900 truncate">
             Call Recording: {playingAudio.customer}
           </p>
-          <span className="text-[10px] text-slate-400">Agent: {playingAudio.agent} • Duration: {playingAudio.duration}</span>
+          <span className="text-[11px] text-slate-500 font-medium">Agent: {playingAudio.agent} • Duration: {playingAudio.duration}</span>
         </div>
       </div>
 

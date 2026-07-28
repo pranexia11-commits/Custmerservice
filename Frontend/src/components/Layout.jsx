@@ -39,48 +39,59 @@ export default function Layout({ children }) {
 
   if (!activeUser) return <>{children}</>;
 
-  const isCustomer = activeUser?.role?.toLowerCase() === 'customer';
+  const isAdmin = activeUser?.role === 'Admin' || activeUser?.rawRole === 'admin';
 
-  const menuItems = [
+  const allMenuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "live-calls", label: "Live Calls", icon: PhoneCall },
     { id: "incoming-calls", label: "Incoming Calls", icon: PhoneIncoming, badge: activeCall ? "Active" : null },
     { id: "outgoing-calls", label: "Outgoing Calls", icon: PhoneOutgoing },
     { id: "call-history", label: "Call History", icon: History },
     { id: "customers", label: "Customers", icon: Users },
-    { id: "bookings", label: "Bookings", icon: CalendarDays },
-    { id: "mediators", label: "Mediators", icon: Award },
+    { id: "bookings", label: isAdmin ? "Bookings" : "Customer Bookings", icon: CalendarDays },
+    { id: "mediators", label: "Mediator", icon: Award },
     { id: "workers", label: "Workers", icon: HardHat },
     { id: "tickets", label: "Tickets", icon: Ticket },
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
     { id: "sms", label: "SMS", icon: MessageSquare },
     { id: "email", label: "Email", icon: Mail },
     { id: "reports", label: "Reports", icon: BarChart3 },
-    { id: "agents", label: "Agents", icon: ShieldAlert },
-    { id: "settings", label: "Settings", icon: SettingsIcon },
-    { id: "customer-sos", label: "Customer App (SOS)", icon: PhoneCall }
-  ].filter(item => {
-    if (isCustomer) {
-      return ["customer-sos", "bookings", "tickets", "settings"].includes(item.id);
+    { id: "settings", label: "Settings", icon: SettingsIcon }
+  ];
+
+  // Specific menu item lists according to role requirements:
+  // Admin: dashboard, livecalls, callhistory, bookings, customers, tickets, reports, emails, sms, whatsapp
+  const adminIds = ["dashboard", "live-calls", "call-history", "bookings", "customers", "tickets", "reports", "email", "sms", "whatsapp"];
+
+  // Customer Support: dashboard, livecalls, incoming calls, outgoing calls, callhistory, customer bookings, mediator, workers, ticket, whatsapp, sms, email, settings
+  const supportIds = ["dashboard", "live-calls", "incoming-calls", "outgoing-calls", "call-history", "bookings", "mediators", "workers", "tickets", "whatsapp", "sms", "email", "settings"];
+
+  const menuItems = allMenuItems.filter(item => {
+    if (isAdmin) {
+      return adminIds.includes(item.id);
+    } else {
+      return supportIds.includes(item.id);
     }
-    return true;
   });
 
+
   return (
-    <div className="flex h-screen bg-violet-50/40 text-slate-900 overflow-hidden">
+    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden">
       {/* Sidebar for Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-violet-100 dark:bg-violet-100 text-slate-900 border-r border-violet-200/60 h-full transition-all duration-300">
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-violet-200/60">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden bg-white shadow-lg flex-shrink-0">
-  <img
-    src={logo}
-    alt="Superherooo Logo"
-    className="w-full h-full object-contain p-1"
-  />
-</div>
+      <aside className="hidden md:flex flex-col w-64 bg-white text-slate-900 border-r border-slate-200/80 h-full transition-all duration-300 shadow-sm">
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-200/80">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden bg-white shadow-md border border-purple-100 flex-shrink-0">
+            <img
+              src={logo}
+              alt="Superherooo Logo"
+              className="w-full h-full object-contain p-1"
+            />
+          </div>
           <div>
-            <h1 className="font-bold text-sm leading-none text-slate-950 tracking-wide">SUPERHEROOO</h1>
-            <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest">Call Center</span>
+            <h1 className="font-extrabold text-sm leading-none text-slate-900 tracking-wide">SUPERHEROOO</h1>
+            <span className="text-[10px] font-extrabold text-purple-600 uppercase tracking-widest">
+              {isAdmin ? "Admin Panel" : "Customer Support"}
+            </span>
           </div>
         </div>
 
@@ -92,19 +103,19 @@ export default function Layout({ children }) {
               <button
                 key={item.id}
                 onClick={() => setCurrentView(item.id)}
-                className={`flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
+                className={`flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group cursor-pointer ${
                   isActive
-                    ? "bg-violet-400 text-slate-950 font-bold shadow-md shadow-violet-400/25"
-                    : "text-slate-700 hover:text-black hover:bg-violet-200/50 dark:text-slate-700 dark:hover:text-black dark:hover:bg-violet-200/50"
+                    ? "bg-purple-600 text-white font-bold shadow-md shadow-purple-600/25"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive ? "text-slate-950" : "text-slate-600 group-hover:scale-110"}`} />
+                  <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive ? "text-white" : "text-slate-400 group-hover:text-purple-600 group-hover:scale-110"}`} />
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
                   <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
-                    item.badge === "Active" ? "bg-rose-500 text-white animate-pulse" : "bg-violet-200 text-violet-800"
+                    item.badge === "Active" ? "bg-rose-500 text-white animate-pulse" : "bg-purple-100 text-purple-700 border border-purple-200"
                   }`}>
                     {item.badge}
                   </span>
@@ -114,10 +125,10 @@ export default function Layout({ children }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-violet-200/60">
+        <div className="p-4 border-t border-slate-200/80">
           <button
             onClick={logout}
-            className="flex items-center gap-3 w-full px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-100/30 rounded-xl transition-colors duration-200"
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors duration-200 cursor-pointer"
           >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>
@@ -127,20 +138,20 @@ export default function Layout({ children }) {
 
       {/* Sidebar Mobile Toggle Menu */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden bg-slate-950/60 backdrop-blur-sm">
-          <aside className="w-64 bg-violet-100 dark:bg-violet-100 text-slate-900 h-full flex flex-col shadow-2xl animate-in slide-in-from-left duration-200">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-violet-200/65">
+        <div className="fixed inset-0 z-50 flex md:hidden bg-slate-900/40 backdrop-blur-sm">
+          <aside className="w-64 bg-white text-slate-900 h-full flex flex-col shadow-2xl animate-in slide-in-from-left duration-200 border-r border-slate-200">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200">
               <div className="flex items-center gap-3">
-               <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden bg-white shadow-lg flex-shrink-0">
-  <img
-    src={logo}
-    alt="Superherooo Logo"
-    className="w-full h-full object-contain p-1"
-  />
-</div>
-                <span className="font-extrabold text-sm text-slate-950">SUPERHEROOO</span>
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden bg-white shadow-md border border-purple-100 flex-shrink-0">
+                  <img
+                    src={logo}
+                    alt="Superherooo Logo"
+                    className="w-full h-full object-contain p-1"
+                  />
+                </div>
+                <span className="font-extrabold text-sm text-slate-900">SUPERHEROOO</span>
               </div>
-              <button onClick={() => setSidebarOpen(false)} className="text-slate-600 hover:text-black">
+              <button onClick={() => setSidebarOpen(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -156,19 +167,19 @@ export default function Layout({ children }) {
                       setCurrentView(item.id);
                       setSidebarOpen(false);
                     }}
-                    className={`flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                    className={`flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
                       isActive
-                        ? "bg-violet-400 text-slate-950 font-bold shadow-md"
-                        : "text-slate-700 hover:text-black hover:bg-violet-200/50 dark:text-slate-700 dark:hover:text-black dark:hover:bg-violet-200/50"
+                        ? "bg-purple-600 text-white font-bold shadow-md shadow-purple-600/25"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className="w-5 h-5 text-slate-600" />
+                      <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-slate-400"}`} />
                       <span>{item.label}</span>
                     </div>
                     {item.badge && (
                       <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
-                        item.badge === "Active" ? "bg-rose-500 text-white animate-pulse" : "bg-violet-200 text-violet-850"
+                        item.badge === "Active" ? "bg-rose-500 text-white animate-pulse" : "bg-purple-100 text-purple-700"
                       }`}>
                         {item.badge}
                       </span>
@@ -178,10 +189,10 @@ export default function Layout({ children }) {
               })}
             </nav>
 
-            <div className="p-4 border-t border-violet-200/65">
+            <div className="p-4 border-t border-slate-200">
               <button
                 onClick={logout}
-                className="flex items-center gap-3 w-full px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-100/30 rounded-xl"
+                className="flex items-center gap-3 w-full px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl"
               >
                 <LogOut className="w-5 h-5" />
                 <span>Logout</span>
@@ -194,7 +205,7 @@ export default function Layout({ children }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Top Header */}
-        <header className="bg-violet-100/90 backdrop-blur-md border-b border-violet-200/60 px-6 py-4 flex items-center justify-between gap-4 z-40">
+        <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 py-4 flex items-center justify-between gap-4 z-40 shadow-xs">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}

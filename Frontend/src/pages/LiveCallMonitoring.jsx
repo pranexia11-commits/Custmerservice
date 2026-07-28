@@ -26,16 +26,16 @@ export default function LiveCallMonitoring() {
       
       {/* Active Monitoring HUD Bridge Overlay */}
       {activeCall && (
-        <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top duration-300">
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border border-indigo-200 text-slate-900 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top duration-300">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/25 flex items-center justify-center animate-pulse">
+            <div className="w-12 h-12 rounded-xl bg-purple-600 text-white flex items-center justify-center animate-pulse shadow-md shadow-purple-600/25">
               <Headphones className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-extrabold tracking-wide uppercase text-sm text-indigo-400">
+              <h3 className="font-extrabold tracking-wide uppercase text-sm text-purple-700">
                 Supervisor Live Bridge Connected
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5 font-medium">
                 {monitorMode === "Listen" && `Silently listening to Agent ${activeCall.agent} <-> Customer ${activeCall.customer}`}
                 {monitorMode === "Whisper" && `Whispering instructions exclusively to Agent ${activeCall.agent}`}
                 {monitorMode === "Join" && `Three-way conference call: Joined with Agent ${activeCall.agent} & Customer ${activeCall.customer}`}
