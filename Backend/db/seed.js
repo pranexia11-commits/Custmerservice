@@ -1,11 +1,24 @@
 import { db } from './index.js';
 import * as schema from './schema.js';
 import bcrypt from 'bcryptjs';
+import { sql } from 'drizzle-orm';
 
 async function seed() {
   console.log('🌱 Starting database seeding...');
   
   try {
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(100) NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        email VARCHAR(150) UNIQUE,
+        role VARCHAR(50) NOT NULL DEFAULT 'customer',
+        customer_name VARCHAR(255),
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      )
+    `);
+
     // 1. Clear existing records in correct dependency order (if foreign keys existed, but they are flat right now)
     await db.delete(schema.agents);
     await db.delete(schema.crmRecords);

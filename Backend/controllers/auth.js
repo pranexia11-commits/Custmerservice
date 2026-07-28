@@ -7,6 +7,38 @@ import { eq, or } from 'drizzle-orm';
 const JWT_SECRET = process.env.JWT_SECRET || process.env.JWT_SECRECT || 'default_jwt_secret_key_change_me_in_production';
 
 /**
+ * Register Admin User
+ */
+export const registerAdmin = async (req, res) => {
+  req.body.role = 'admin';
+  return register(req, res);
+};
+
+/**
+ * Login Admin User
+ */
+export const loginAdmin = async (req, res) => {
+  req.body.expectedRole = 'admin';
+  return login(req, res);
+};
+
+/**
+ * Register Customer / Customer Support User
+ */
+export const registerCustomer = async (req, res) => {
+  req.body.role = 'customer';
+  return register(req, res);
+};
+
+/**
+ * Login Customer / Customer Support User
+ */
+export const loginCustomer = async (req, res) => {
+  req.body.expectedRole = 'customer';
+  return login(req, res);
+};
+
+/**
  * Register a new user (defaults to 'customer' role)
  */
 export const register = async (req, res) => {
@@ -41,7 +73,7 @@ export const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Default registration role is 'customer' unless explicitly set to 'admin' (can restrict later if needed)
+    // Default registration role is 'customer' unless explicitly set to 'admin'
     const userRole = role || 'customer';
 
     const newUser = {
@@ -70,7 +102,7 @@ export const register = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: `${createdUser.role === 'admin' ? 'Admin' : 'Customer Support'} registered successfully`,
       data: {
         token,
         user: {
@@ -96,7 +128,7 @@ export const register = async (req, res) => {
  * Log in an existing user
  */
 export const login = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, expectedRole } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ 
@@ -117,6 +149,14 @@ export const login = async (req, res) => {
       return res.status(401).json({ 
         success: false, 
         message: 'Invalid username or password' 
+      });
+    }
+
+    // Check role if explicitly specified for login portal
+    if (expectedRole && user.role !== expectedRole) {
+      return res.status(403).json({ 
+        success: false, 
+        message: `Account is registered as ${user.role}. Please use the ${user.role === 'admin' ? 'Admin' : 'Customer Support'} portal.` 
       });
     }
 
@@ -197,3 +237,4 @@ export const me = async (req, res) => {
     });
   }
 };
+

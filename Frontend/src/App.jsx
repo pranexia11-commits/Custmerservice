@@ -5,6 +5,8 @@ import AudioPlayer from "./components/AudioPlayer";
 
 // Admin Pages
 import Login from "./pages/Login";
+import AdminAuth from "./pages/AdminAuth";
+import CustomerSupportAuth from "./pages/CustomerSupportAuth";
 import Dashboard from "./pages/Dashboard";
 import IncomingCall from "./pages/IncomingCall";
 import CallHistory from "./pages/CallHistory";
@@ -40,11 +42,6 @@ function AppContent() {
       // Login Pages
       case "login":
         return <Login />;
-
-      case "agent-login":
-        return <AgentLogin />;
-
-      // Dashboards
       case "dashboard":
         return <Dashboard />;
 
@@ -111,6 +108,7 @@ function AppContent() {
         return <Dashboard />;
     }
   };
+
 
   return (
     <Layout>

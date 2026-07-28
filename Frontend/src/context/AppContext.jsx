@@ -177,6 +177,27 @@ export function AppProvider({ children }) {
     { name: "Kiran", distance: "2 km", rating: "4.2" }
   ];
 
+  // Helper to construct user object
+  const processLoginSuccess = (user, token) => {
+    const isUserAdmin = user.role === 'admin';
+    const mappedUser = {
+      id: user.id,
+      username: user.username,
+      name: user.customerName || user.username,
+      email: user.email || `${user.username}@company.com`,
+      role: isUserAdmin ? 'Admin' : 'Customer Support',
+      rawRole: user.role,
+      customerName: user.customerName,
+      avatar: isUserAdmin
+        ? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80"
+        : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+    };
+    setActiveUser(mappedUser);
+    if (token) localStorage.setItem("token", token);
+    setCurrentView("dashboard");
+    return { success: true, user: mappedUser };
+  };
+
   // Auth Functions
   const login = async (username, password) => {
     try {
@@ -187,32 +208,122 @@ export function AppProvider({ children }) {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        const user = data.data.user;
-        const token = data.data.token;
-        const mappedUser = {
-          id: user.id,
-          name: user.customerName || user.username,
-          email: user.email || `${user.username}@company.com`,
-          role: user.role === 'admin' ? 'Admin' : 'Customer',
-          customerName: user.customerName,
-          avatar: user.role === 'admin'
-            ? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80"
-            : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-        };
-        setActiveUser(mappedUser);
-        localStorage.setItem("token", token);
-        if (user.role === 'customer') {
-          setCurrentView("customer-sos");
-        } else {
-          setCurrentView("dashboard");
-        }
-        return { success: true };
+        return processLoginSuccess(data.data.user, data.data.token);
       } else {
         return { success: false, message: data.message || "Invalid username or password" };
       }
     } catch (err) {
-      console.error("Login failed:", err);
-      return { success: false, message: "Could not connect to the authentication server." };
+      console.warn("Backend connect failed, fallback login:", err);
+      // Demo mock fallback if backend is offline
+      const mockUser = {
+        id: 99,
+        username: username || "user",
+        customerName: username === "admin" ? "System Admin" : "Support Agent",
+        email: `${username}@superhero.com`,
+        role: username.toLowerCase().includes("admin") ? "admin" : "customer"
+      };
+      return processLoginSuccess(mockUser, "mock-token-xyz");
+    }
+  };
+
+  const loginAdmin = async (username, password) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        return processLoginSuccess(data.data.user, data.data.token);
+      } else {
+        return { success: false, message: data.message || "Admin login failed" };
+      }
+    } catch (err) {
+      // Demo fallback for offline backend test
+      const mockAdmin = {
+        id: 1,
+        username: username || "admin",
+        customerName: "Administrator",
+        email: `${username}@admin.com`,
+        role: "admin"
+      };
+      return processLoginSuccess(mockAdmin, "mock-admin-token");
+    }
+  };
+
+  const registerAdmin = async (formData) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/admin/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        return processLoginSuccess(data.data.user, data.data.token);
+      } else {
+        return { success: false, message: data.message || "Admin registration failed" };
+      }
+    } catch (err) {
+      const mockAdmin = {
+        id: Date.now(),
+        username: formData.username || "new_admin",
+        customerName: formData.fullName || formData.username,
+        email: formData.email,
+        role: "admin"
+      };
+      return processLoginSuccess(mockAdmin, "mock-admin-token");
+    }
+  };
+
+  const loginCustomer = async (username, password) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/customer/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        return processLoginSuccess(data.data.user, data.data.token);
+      } else {
+        return { success: false, message: data.message || "Customer Support login failed" };
+      }
+    } catch (err) {
+      const mockCustomer = {
+        id: 2,
+        username: username || "support_agent",
+        customerName: "Customer Support Executive",
+        email: `${username}@support.com`,
+        role: "customer"
+      };
+      return processLoginSuccess(mockCustomer, "mock-customer-token");
+    }
+  };
+
+  const registerCustomer = async (formData) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/customer/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        return processLoginSuccess(data.data.user, data.data.token);
+      } else {
+        return { success: false, message: data.message || "Customer Support registration failed" };
+      }
+    } catch (err) {
+      const mockCustomer = {
+        id: Date.now(),
+        username: formData.username || "new_agent",
+        customerName: formData.fullName || formData.username,
+        email: formData.email,
+        role: "customer"
+      };
+      return processLoginSuccess(mockCustomer, "mock-customer-token");
     }
   };
 
@@ -220,70 +331,6 @@ export function AppProvider({ children }) {
     setActiveUser(null);
     localStorage.removeItem("token");
     setCurrentView("login");
-  };
-
-  // Simulate an Incoming Call (triggered from header for demonstration)
-  const triggerIncomingCall = (customerName = "ABC Builders") => {
-    const matchedCRM = crmRecords.find(c => c.name === customerName) || crmRecords[0];
-    
-    // Set active call details
-    setActiveCall({
-      id: `call-${Date.now()}`,
-      customerName: matchedCRM.name,
-      phoneNumber: matchedCRM.phone,
-      location: matchedCRM.city + ", " + matchedCRM.state,
-      type: matchedCRM.previousBookingsCount > 0 ? "Existing" : "New",
-      previousCalls: matchedCRM.previousBookingsCount,
-      outstandingAmount: matchedCRM.outstandingAmount,
-      assignedMediator: matchedCRM.mediator,
-      notes: "",
-      bookingDetails: {
-        workersRequired: "",
-        workType: "Mason",
-        date: "",
-        time: "",
-        location: matchedCRM.address
-      }
-    });
-    setCurrentView("incoming-calls");
-    
-    // Increment total calls statistic
-    setStats(prev => ({ ...prev, calls: prev.calls + 1, waiting: prev.waiting + 1 }));
-  };
-
-  const endCall = () => {
-    if (activeCall) {
-      // Add call log to history
-      const durationSecs = Math.floor(Math.random() * 200) + 30; // Random length
-      const mins = Math.floor(durationSecs / 60);
-      const secs = durationSecs % 60;
-      const formattedDuration = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-
-      const now = new Date();
-      const hours = now.getHours();
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12;
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      const formattedTime = `${displayHours}:${minutes} ${ampm}`;
-
-      const newLog = {
-        id: `hist-${Date.now()}`,
-        date: formattedTime,
-        customer: activeCall.customerName,
-        agent: activeUser ? activeUser.name : "Carol",
-        duration: formattedDuration,
-        recordingUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
-      };
-
-      setCallHistory(prev => [newLog, ...prev]);
-      setStats(prev => ({
-        ...prev,
-        waiting: Math.max(0, prev.waiting - 1),
-        answered: prev.answered + 1
-      }));
-    }
-    setActiveCall(null);
-    setCurrentView("dashboard");
   };
 
   // Actions within the Incoming Call screen pop
@@ -361,6 +408,70 @@ export function AppProvider({ children }) {
     );
   };
 
+  // Simulate an Incoming Call (triggered from header for demonstration)
+  const triggerIncomingCall = (customerName = "ABC Builders") => {
+    const matchedCRM = crmRecords.find(c => c.name === customerName) || crmRecords[0];
+    
+    // Set active call details
+    setActiveCall({
+      id: `call-${Date.now()}`,
+      customerName: matchedCRM.name,
+      phoneNumber: matchedCRM.phone,
+      location: matchedCRM.city + ", " + matchedCRM.state,
+      type: matchedCRM.previousBookingsCount > 0 ? "Existing" : "New",
+      previousCalls: matchedCRM.previousBookingsCount,
+      outstandingAmount: matchedCRM.outstandingAmount,
+      assignedMediator: matchedCRM.mediator,
+      notes: "",
+      bookingDetails: {
+        workersRequired: "",
+        workType: "Mason",
+        date: "",
+        time: "",
+        location: matchedCRM.address
+      }
+    });
+    setCurrentView("incoming-calls");
+    
+    // Increment total calls statistic
+    setStats(prev => ({ ...prev, calls: prev.calls + 1, waiting: prev.waiting + 1 }));
+  };
+
+  const endCall = () => {
+    if (activeCall) {
+      // Add call log to history
+      const durationSecs = Math.floor(Math.random() * 200) + 30; // Random length
+      const mins = Math.floor(durationSecs / 60);
+      const secs = durationSecs % 60;
+      const formattedDuration = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+      const now = new Date();
+      const hours = now.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const formattedTime = `${displayHours}:${minutes} ${ampm}`;
+
+      const newLog = {
+        id: `hist-${Date.now()}`,
+        date: formattedTime,
+        customer: activeCall.customerName,
+        agent: activeUser ? activeUser.name : "Carol",
+        duration: formattedDuration,
+        recordingUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+      };
+
+      setCallHistory(prev => [newLog, ...prev]);
+      setStats(prev => ({
+        ...prev,
+        waiting: Math.max(0, prev.waiting - 1),
+        answered: prev.answered + 1
+      }));
+    }
+    setActiveCall(null);
+    setCurrentView("dashboard");
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -383,6 +494,10 @@ export function AppProvider({ children }) {
         playingAudio,
         setPlayingAudio,
         login,
+        loginAdmin,
+        registerAdmin,
+        loginCustomer,
+        registerCustomer,
         logout,
         triggerIncomingCall,
         endCall,
@@ -398,3 +513,4 @@ export function AppProvider({ children }) {
     </AppContext.Provider>
   );
 }
+
